@@ -1,39 +1,43 @@
 library(shiny)
+library(waiter)
 
 ui <- fluidPage(
   plotOutput("c"),
-  actionButton('d', "make a plot")
-  )
+  actionButton('d', "make a plot"),
+  use_waiter()
+)
 
 server <- function(input, output, session) {
+  w<-Waiter$new(id = "c")
   r<-reactive({iris$Sepal.Length})
   m<-modalDialog(
     title = "make plot?",
     footer = tagList(
       actionButton("ok","show plot"),
       actionButton("cancel","reset"))
-    )
-
+  )
+  
   observeEvent(input$d,{
     showModal(m)
-    })
+  })
   
   observeEvent(input$cancel,{
     removeModal()
     output$c <- renderPlot({ NULL })
-    })
+  })
   
   observeEvent(input$ok,{
     removeModal()
     withProgress(message = "Computing graph",{
       showNotification("all done")
-      Sys.sleep(2)
-      })
-
+    })
+    
     output$c<-renderPlot({
+      w$show()
+      Sys.sleep(2)
       plot(r())
-      })
+    })
   })
 }
-  
+
 shinyApp(ui, server)
