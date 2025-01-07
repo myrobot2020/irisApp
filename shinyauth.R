@@ -6,7 +6,7 @@ library(shinyauthr)
 # Sample user data
 user_base <- tibble(
   user = c("user1", "user2"),
-  password = sapply(c("pass1", "pass2"), password_store),
+  password = sapply(c("pass1", "pass2"), sodium::password_store),
   permissions = c("admin", "standard"),
   name = c("User One", "User Two")
 )
@@ -14,28 +14,11 @@ user_base <- tibble(
 
 
 ui <- fluidPage(
-  
-  titlePanel("Old Faithful Geyser Data"),
-  div(class = "pull-right", 
-      shinyauthr::logoutUI(id = "logout")),
+  shinyauthr::logoutUI(id = "logout"),
   shinyauthr::loginUI(id = "login"),
-  sidebarLayout(
-    sidebarPanel(
-      sliderInput("bins",
-                  "Number of bins:",
-                  min = 1,
-                  max = 50,
-                  value = 30)
-    ),
-    mainPanel(
-      plotOutput("distPlot")
-    )
-  )
-)
+  plotOutput("a"))
 
 server <- function(input, output, session) {
-  
-  # Define login credentials
   credentials <- shinyauthr::loginServer(
     id = "login",
     data = user_base,
@@ -51,14 +34,10 @@ server <- function(input, output, session) {
     active = reactive(credentials()$user_auth)
   )
   
-  output$distPlot <- renderPlot({
+  output$a <- renderPlot({
     req(credentials()$user_auth)
-    x <- faithful[, 2]
-    bins <- seq(min(x), max(x), length.out = input$bins + 1)
-    hist(x, breaks = bins, col = 'darkgray', border = 'white',
-         xlab = 'Waiting time to next eruption (in mins)',
-         main = 'Histogram of waiting times')
-    })
-  }
+    plot(iris$Sepal.Length)
+  })
+}
 
 shinyApp(ui = ui, server = server)
