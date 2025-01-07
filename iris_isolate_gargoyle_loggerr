@@ -1,0 +1,34 @@
+library(shiny)
+library(gargoyle)
+library(logger)
+
+ui <- fluidPage(
+  selectInput("b","b",names(iris)),
+  actionButton("a","a"),
+  plotOutput("b")
+)
+
+server <- function(input, output, session) {
+  log_info("App has started!!!")
+  init("t","t1")
+
+  observeEvent(input$a,{
+    log_info("t has started!!!")
+    trigger("t")
+  })
+  
+  on("t",{
+    trigger("t1")
+  })
+  
+  observeEvent(input$a,{
+    watch("t1")
+    p<-isolate(iris[[input$b]])
+    output$b<-renderPlot({
+      plot(p)
+    })  
+  })
+}
+
+shinyApp(ui, server)
+
