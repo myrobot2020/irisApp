@@ -1,0 +1,53 @@
+library(shiny)
+library(tibble)
+library(sodium)
+library(shinyauthr)
+
+valid_credentials <- list(
+  user1 = list(username = "1", password = "1", role = "admin"),
+  user2 = list(username = "2", password = "2", role = "ta")
+)
+
+
+ui <- fluidPage(
+  textInput("username", "Username:"),
+  passwordInput("password", "Password:"),
+  actionButton("login", "Login"),
+  uiOutput("tabs")
+  )
+
+server <- function(input, output, session) {
+  user_role <- reactiveVal(NULL)
+  
+  observeEvent(input$login, {
+    if (input$username == valid_credentials$user1$username && input$password == valid_credentials$user1$password) {
+      user_role("admin")
+    } else if (input$username == valid_credentials$user2$username && input$password == valid_credentials$user2$password) {
+      user_role("ta")
+    } else {
+      user_role(NULL)
+    }
+  })
+
+  # Render the tabs based on user role
+  output$tabs <- renderUI({
+    req(user_role())  # Ensure the user is logged in
+    
+    if (user_role() == "admin") {
+      tabsetPanel(
+        tabPanel("Tab 1"),
+        tabPanel("Tab 2"),
+        tabPanel("Tab 3")
+      )
+    } else if (user_role() == "ta") {
+      tabsetPanel(
+        tabPanel("Tab 1"),
+        tabPanel("Tab 2")
+      )
+    } else {
+      h3("Please log in to access the tabs.")
+    }
+  })
+}
+
+shinyApp(ui = ui, server = server)
