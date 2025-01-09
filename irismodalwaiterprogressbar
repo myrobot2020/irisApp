@@ -1,5 +1,6 @@
 library(shiny)
 library(waiter)
+library(shinyjqui)
 
 ui <- fluidPage(
   plotOutput("c"),
@@ -10,13 +11,13 @@ ui <- fluidPage(
 server <- function(input, output, session) {
   w<-Waiter$new(id = "c")
   r<-reactive({iris$Sepal.Length})
-  m<-modalDialog(
+  m<-draggableModalDialog(
     title = "make plot?",
     footer = tagList(
       actionButton("ok","show plot"),
       actionButton("cancel","reset"))
   )
-  
+
   observeEvent(input$d,{
     showModal(m)
   })
