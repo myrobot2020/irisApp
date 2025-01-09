@@ -5,8 +5,8 @@ library(shinyauthr)
 
 # Sample user data
 user_base <- tibble(
-  user = c("user1", "user2"),
-  password = sapply(c("pass1", "pass2"), sodium::password_store),
+  user = c("1", "2"),
+  password = sapply(c("1", "2"), sodium::password_store),
   permissions = c("admin", "standard"),
   name = c("User One", "User Two")
 )
@@ -16,7 +16,10 @@ user_base <- tibble(
 ui <- fluidPage(
   shinyauthr::logoutUI(id = "logout"),
   shinyauthr::loginUI(id = "login"),
-  plotOutput("a"))
+  plotOutput("a"),
+  tableOutput("b"),
+  uiOutput("c")
+  )
 
 server <- function(input, output, session) {
   credentials <- shinyauthr::loginServer(
@@ -36,7 +39,29 @@ server <- function(input, output, session) {
   
   output$a <- renderPlot({
     req(credentials()$user_auth)
-    plot(iris$Sepal.Length)
+    if (credentials()$info$permissions=="admin") {
+      plot(iris$Sepal.Length)
+    }
+    else if (credentials()$info$permissions=="standard") {
+      plot(iris$Petal.Length)
+      }
+  })
+  
+
+  output$c<-renderUI({
+    req(credentials()$user_auth)
+    if (credentials()$info$permissions=="admin"){
+      tabsetPanel(
+        tabPanel("Tab 1"),
+        tabPanel("Tab 2"),
+        tabPanel("Tab 3"))
+    }
+    else if (credentials()$info$permissions=="standard") {
+      tabsetPanel(
+        tabPanel("Tab 1"),
+        tabPanel("Tab 2")
+      )
+    }
   })
 }
 
