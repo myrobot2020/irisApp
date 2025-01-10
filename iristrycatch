@@ -1,0 +1,45 @@
+library(shiny)
+
+# Define UI
+ui <- fluidPage(
+  titlePanel("Iris Species Mean Calculator"),
+  
+  sidebarLayout(
+    sidebarPanel(
+      textInput("species1", "Enter Species 1:", value = "setosa"),
+      textInput("species2", "Enter Species 2:", value = "versicolor"),
+      textInput("species3", "Enter Species 3:", value = "virginica"),
+      actionButton("calc_button", "Calculate Means")
+    ),
+    
+    mainPanel(
+      textOutput("result1"),
+      textOutput("result2"),
+      textOutput("result3")
+    )
+  )
+)
+
+# Define server logic
+server <- function(input, output) {
+  
+  observeEvent(input$calc_button, {
+    species_list <- c(input$species1, input$species2, input$species3)
+    results <- sapply(species_list, function(species) {
+      tryCatch({
+        species_data <- iris[iris$Species == species, ]
+        mean_value <- mean(species_data$Sepal.Length)
+        paste("Mean Sepal Length for", species, ":", mean_value)
+      }, error = function(e) {
+        paste("Error: Species", species, "not found in iris dataset.")
+      })
+    })
+    
+    output$result1 <- renderText({ results[1] })
+    output$result2 <- renderText({ results[2] })
+    output$result3 <- renderText({ results[3] })
+  })
+}
+
+# Run the application
+shinyApp(ui = ui, server = server)
