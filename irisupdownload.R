@@ -12,10 +12,7 @@ server <- function(input, output, session) {
   output$b<-renderTable({
     df()
   })
-  output$c <- downloadHandler(
-    filename = function() {
-      paste0(input$a, ".csv")
-    },
+  output$c <- downloadHandler(paste0(input$a, ".csv"),
     content = function(file) {
       write.csv(df(), file)
     }
